@@ -1,0 +1,2347 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gün kalkulýatory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<style>
+
+
+    #map {
+        width: 100%;
+        height: 70vh; /* Adjusted to leave space for panel */
+    }
+    #solar-panel {
+        display: none; /* Hidden by default, shown after clicking the map */
+        padding: 15px;
+        font-family: Arial, sans-serif;
+        border: 1px solid #ccc;
+        margin: 10px;
+        background-color: #f9f9f9;
+    }
+    #solar-panel h3 {
+        margin-top: 0;
+    }
+    {#.input-group {#}
+    {#    margin-bottom: 10px;#}
+    {# }#}
+    .input-group label {
+        display: inline-block;
+        width: 150px;
+    }
+    .input-group input[type="number"] {
+        width: 50px;
+    }
+    {#.angle-options {#}
+    {#    margin-bottom: 10px;#}
+    {# }#}
+    .angle-options input[type="radio"] {
+        margin-left: 10px;
+    }
+
+    body {
+        font-family:  Verdana, sans-serif;
+        margin-left: 0;
+        margin-right: 20px;
+        color: #333333;
+        line-height: 1.5;
+    }
+    .title {
+        font-weight: bold;
+        font-size: xx-large;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    .content {
+        margin: 0;
+        padding: 0;
+        color: #404040;
+        font-size: 16px;
+        /*height: 70px;*/
+    }
+    .box {
+        border: 1px solid #b3b3b3;
+        margin-top: 25px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .box:active, .box:hover {
+        background-color: #188b30;
+    }
+
+    {#img .burger_icon {#}
+    {#    background-color: #eee;#}
+    {#    height: 30px;#}
+    {#    width: 30px;#}
+    {# }#}
+
+    .accordion {
+        background-color: #fff;
+        cursor: pointer;
+        padding: 27px 30px 28px 35px;
+        font-size: 16px;
+        color: #404040;
+        width: 100%;
+        text-align: left;
+        border: 5px;
+        box-sizing: border-box;
+        outline: none;
+        transition: 0.4s;
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        justify-content: space-between;
+        z-index: 1;
+    }
+
+    .box1 {
+        margin-top: 20px;
+        background-color: #fff;
+        padding: 10px 15px;
+        font-size: 16px;
+        color: #404040;
+        width: 97.5%;
+        text-align: left;
+        border: 1px solid #b3b3b3;
+        outline: none;
+        transition: 0.4s;
+        border-radius: 6px;
+        /*display: block;*/
+        /*display: flex;*/
+        /*flex-direction: row;*/
+        /*align-items: stretch;*/
+        /*justify-content: space-between;*/
+    }
+
+    .grid_container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        /*grid-template-rows: auto auto;*/
+        gap: 20px;
+        height: auto;
+        /*width: 100vh;*/
+    }
+
+    @media (max-width: 768px) {
+        .grid_container {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+    {#.stat_img {#}
+    {#    width: 20px;#}
+    {#    height: 20px;#}
+    {#    justify-items: right;#}
+    {#    /*background-color: #188b30;*/#}
+    {#    color: #fff;#}
+    {# }#}
+    {#.stat_img:hover, .stat_img:active {#}
+    {#    background-color: #188b30;#}
+    {#    image-orientation: flip;#}
+    {# }#}
+    .panel {
+        padding: 10px 25px;
+        background-color: white;
+        display: none;
+        overflow: hidden;
+        margin-top: -25px;
+    }
+
+    .int {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        background: #fff;
+        border: 2px solid #188b30;
+        font-size: 24px;
+        color: #188b30;
+        margin-top: 20px;
+        font-weight: 500;
+    }
+
+    .title1 {
+        font-size: 22px;
+    }
+    .content1 {
+        margin-top: -15px;
+        color: #808080;
+    }
+
+    .equipment {
+        margin-left: 90px;
+        color: #666;
+    }
+    .device_count {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        font-size: 16px;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    .device_count input {
+        font-size: 16px;
+        height: 24px;
+        width: 50px;
+        border-radius: 3px;
+        padding: 1px 5px;
+        color: #555555;
+        background: #efefef;
+        border: 1px solid #b3b3b3;
+    }
+
+    .desc {
+        font-size: 17px;
+        margin: 10px 0 10px;
+        color: #000;
+    }
+    .resultDiv {
+        color: #000;
+        font-size: 13px;
+        width: 150px;
+        /*height: 20px;*/
+        /*opacity: 0;*/
+        display: none;
+        /*visibility: hidden; !* Use this instead of display: none *!*/
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    {#.resultWrapper {#}
+    {#    height: 20px; /* Reserve space */#}
+    {#    display: flex;#}
+    {#    align-items: center;#}
+    {# }#}
+
+    select {
+        padding: 5px 5px;
+        width: 100%;
+        font-size: 14px;
+        height: 28px;
+        border-radius: 3px;
+        background: #f1f1f1;
+        border: 1px solid #cecece;
+        outline: none;
+        color: #555;
+    }
+    option {
+        background: #fff;
+    }
+    .free-power {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        justify-content: space-between;
+    }
+
+    .solar_number {
+        width: 40px;
+        height: 28px;
+        padding: 0 8px;
+        border: 1px solid #b3b3b3;
+        border-radius: 3px;
+        color: #444;
+    }
+
+    .inputs {
+        display: flex;
+        flex-direction: column;
+        font-size: 16px;
+        color: #000;
+        /*width: 100px;*/
+        /*padding: 5px 0;*/
+    }
+
+    .rotate-param {
+        display: flex;
+        flex-direction: row;
+        height: 85px;
+        /*width: 150px;*/
+    }
+    .free-rotate {
+        display: flex;
+        flex-direction: row;
+        margin-top: 45px;
+    }
+    .input-uniform {
+        display: flex;
+        flex-direction: row;
+    }
+    .control-plus {
+        height: 24px;
+        width: 26px;
+        color: #555555;
+        background: #ededed;
+        border-radius: 0 4px 4px 0;
+        border: 1px solid #b3b3b3;
+        text-align: center;
+        cursor: pointer;
+        right: 0;
+        top: 0;
+        font-size: 20px;
+        line-height: 1.1;
+    }
+
+    .control-minus {
+        height: 24px;
+        width: 26px;
+        color: #555555;
+        background: #ededed;
+        border-radius: 4px 0 0 4px;
+        border: 1px solid #b3b3b3;
+        text-align: center;
+        cursor: pointer;
+        right: 0;
+        top: 0;
+        font-size: 20px;
+        line-height: 1.1;
+    }
+
+    .control-minus:hover, .control-plus:hover {
+        background-color: #42ABFF;
+        color: #fff;
+        border-color: #42ABFF;
+    }
+
+    {#.rotate_input {#}
+    {#    height: 26px;#}
+    {#    width: 40px;#}
+    {#    box-shadow: none;#}
+    {#    /*border-color: #fff;*/#}
+    {#    /*padding: 0 30px;*/#}
+    {#    color: #555555;#}
+    {#    box-sizing: border-box;#}
+    {#    text-align: left;#}
+    {# }#}
+
+    .selected-box-solar {
+        display: block;
+    }
+
+    .selected-box-solar1 {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .invertor_panel {
+        height: 35px;
+        width: 250px;
+        background-color: #ffffff;
+    }
+
+    .empty-image {
+        height: 200px;
+        width: 225px;
+    }
+
+    input[type=checkbox] {
+        border-color: #999999;
+    }
+
+    .container-body {
+        display: grid;
+        grid-column: span;
+    }
+
+    .table-result {
+        display: table;
+        border-collapse: collapse;
+        box-sizing: border-box;
+        text-indent: initial;
+        unicode-bidi: isolate;
+        border-spacing: 2px;
+        border: 1px solid #d9d9d9;
+        background-color: #f5fffc;
+        text-align: center;
+        padding: 5px;
+        color: #555555;
+    }
+
+    header {
+        margin: 0;
+        padding: 0;
+        font-family: 'Poppins', sans-serif;
+        box-sizing: border-box;
+    }
+
+    .hero {
+        width: 100%;
+        min-height: 80px;
+        /*background: #eceaff;*/
+        color: #525252;
+    }
+    nav {
+        background: #92eda6;
+        width: 90%;
+        padding: 10px 5%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: fixed;
+        top: 0;
+        z-index: 2;
+        margin-bottom: 50px;
+    }
+
+    nav ul {
+        width: 100%;
+        text-align: right;
+    }
+    nav ul li {
+        display: inline-block;
+        list-style: none;
+        margin: 10px 20px;
+    }
+
+    nav ul li a {
+        color: #000;
+        font-family: Oxygen, sans-serif;
+        text-decoration: none;
+    }
+    nav ul li a:hover {
+        font-weight: bolder;
+    }
+
+    .user-info img {
+        width: 60px;
+        border-radius: 50%;
+        margin-right: 15px;
+    }
+    .sub-menu hr {
+        border: 0;
+        height: 1px;
+        width: 100%;
+        background: #ccc;
+        margin: 15px 0 10px;
+    }
+
+    .btnLogin-popup {
+        width: 130px;
+        height: 30px;
+        background: transparent;
+        border: 2px solid #fff;
+        outline: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1.1em;
+        color: #fff;
+        font-weight: 500;
+        margin-left: 40px;
+        text-decoration: none;
+        text-align: center;
+        justify-content: center;
+        transition: .5s;
+    }
+    .btnLogin-popup:hover {
+        background: #fff;
+        color: #000;
+    }
+
+    .energy-power table {
+        box-sizing: border-box;
+        border-radius: 5px;
+        border: 1px solid #b3b3b3;
+        padding: 15px 15px 15px 15px;
+        align-items: center;
+        margin: 0 auto;
+        width: 1150px;
+    }
+    .energy-power tr {
+        display: flex;
+        flex-direction: row;
+        height: 40px;
+    }
+    .custom-footer {
+        background-color: #f8f8f8;
+        color: #333;
+        padding: 30px 20px;
+        font-size: 14px;
+        width: 99%;
+    {#font-family: Serif;#}
+    }
+
+    .footer-top {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .footer-left ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-left a {
+        text-decoration: none;
+        color: #000;
+        font-weight: bold;
+    }
+
+    .footer-center {
+        text-align: center;
+        line-height: 1.5;
+        font-family: Arial, sans-serif;
+    }
+
+    .footer-center .icon {
+        margin-right: 5px;
+        font-size: 18px;
+    }
+
+    .footer-center small {
+        display: block;
+        font-size: 12px;
+        color: #888;
+    }
+
+    .footer-right {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        color: #666;
+    }
+
+    .policy-link {
+        font-size: 13px;
+        text-decoration: none;
+        color: #555;
+        margin-right: 70px;
+    }
+
+    .footer-bottom {
+        color: #666;
+        font-size: 17px;
+        line-height: 1.6;
+        margin-top: 20px;
+        border-top: 1px solid #ddd;
+        padding-top: 15px;
+    }
+
+    #chart-container {
+        width: 1200px;
+        height: 400px;
+        margin: 0 auto;
+        position: relative;
+    }
+    #solarChart {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+</style>
+<body>
+<header>
+    <div class="hero">
+        <nav>
+            <a href="{% url 'home' %}" style="font-family: Garamond, serif; font-size: 20px; color: #188b30; font-weight: 600; text-decoration: none">Onlaýn <br/>kalkulýator</a>
+            <ul>
+                <li><a href="{% url 'home' %}">Baş sahypa</a></li>
+                <li><a href="{% url 'calculator' %}">Kalkulýator</a></li>
+{#                {% if user.is_authenticated %}<li><a href="{% url 'calculated-panels' %}">Hasaplamalaryň taryhy</a></li>{% endif %}#}
+            </ul>
+            {% if user.is_authenticated %} <a href="{% url 'sign-out' %}" class="btnLogin-popup">Logout</a>
+            {% else %} <a href="{% url 'sign-in' %}" class="btnLogin-popup">Login</a>{% endif %}
+        </nav>
+    </div>
+    <!--
+    -->
+</header>
+<div style="padding: 15px">
+    <div class="title">
+        Gün panelleriniň güýjüni hasaplaýan kalkulýator
+    </div>
+    <p class="content">
+        Izolýasiýa maglumatlary NASA serweri tarapyndan üpjün edilýär, ölçeg taryhy 1984-nji ýyldan başlaýar we häzirki wagtda dünýäde iň ygtybarly maglumatdyr.
+    </p>
+    <div class="box">
+        <button class="accordion">
+            Görkezmeleri okaň
+        </button>
+        <div class="panel">
+            <p><b>1. Sebit saýlamak</b> <br/>
+                Ilki bilen, gün elektrik stansiýasynyň kartada ýerleşýän sebitini saýlamaly.</p>
+            <p><b>2. Sarp ediş hasaplamasy</b> <br/>
+                Gün panellerini saýlanyňyzda, sarp ediş mukdaryny dogry hasaplamak gaty möhümdir. Munuň üçin kalkulýatorda ulanjak elektrik enjamlaryňyzy görkezmek haýyş edilýär. Günüň dowamynda olaryň sanyny, güýjüni, iş wagtyny görkeziň. Biziň hödürleýän sanawymyzda zerur enjam ýok bolsa, “Beýleki enjam” elementini ulanyp bilersiňiz.</p>
+            <p><b>3. Enjamlary we wariantlary saýlamak</b> <br/>
+                Açylýan sanawdan ilki bilen ulanmagy meýilleşdirýän ýa-da eýýäm ulanýan gün modullaryňyzy saýlaň, olaryň sanyny görkezmegi ýatdan çykarmaň.
+                Gerekli gün moduly teklip edilýän sanawda ýok bolsa, “Mende başga bir gün moduly bar” -ny saýlaň, soňra gün elektrik stansiýasynyň bahasyny doly kesgitlemek üçin, açylýan sanawdan tor inwertoryny saýlamaly bolarsyňyz we zerur bolsa goşmaça opsiýalar:
+                berkidijiler (samolýotda gün modullaryny berkitmek ulgamy), ulgam gurlanda talap edilip bilinjek sarp ediş materiallary (enjam, ýylylygy gysmak, birikdirijiler we ş.m.).
+            </p>
+            <p>
+                <b>4. Maglumat almak</b><br/>
+                Kalkulýatorymyz ýylda iň ýokary ortaça çykyş üçin iň amatly ýapgyt burçuny ("Optimum"), şeýle hem aýlaw mehanizmini ulansaňyz ýa-da ýylyň belli bir döwründe elektrik stansiýasyny işledseňiz peýdaly bolar (mysal üçin, diňe tomusda, bu ýagdaýda "Tomus" burçuna üns bermelisiňiz).
+                Näme üçindir ulgam tarapyndan teklip edilýän iň amatly burçlary ulanmak islemeýän bolsaňyz (mysal üçin, jaýyňyzyň üçegine modullary gurmagy meýilleşdirýärsiňiz we burç bar bolan gurluş bilen öňünden kesgitlenýär), özbaşdak (zerur burç) belläp bilersiňiz. Burç üýtgese, önümçilik maglumatlary awtomatiki hasaplanar.
+            </p>
+        </div>
+    </div>
+    <div style="display: flex; flex-direction: row" class="power-step">
+        <button class="int">
+            1
+        </button>
+        <div style="display: flex; flex-direction: column; margin-left: 20px">
+            <p class="title1">Hasaplanan maglumatlaryň koordinatlaryny almak</p>
+            <p class="content1">Kartada gün elektrik stansiýasynyň ýerleşýän ýerini görkeziň</p>
+        </div>
+    </div>
+    <div id="map"></div>
+    <div style="display: flex; flex-direction: row" class="power-step">
+        <button  class="int">
+            2
+        </button>
+        <div style="display: flex; flex-direction: column; margin-left: 20px">
+            <p class="title1">Ulanylan enjamlary kesgitlemek</p>
+            <p class="content1">
+                <i>Zerur bolsa, energiýa sarp edijileriňiziň ýüküni hasaplaň.</i><br>
+                Gün modulyny saýlaň, mukdaryny kesgitläň, egilme burçuny düzüň, inwertory we goşmaça wariantlary saýlaň.
+            </p>
+        </div>
+    </div>
+    <div class="box">
+        <button class="accordion" style="font-weight: bolder">Sarp edijiler tarapyndan ýük hasaplaň (hasaplamak zerur bolsa basyň)</button>
+        <div class="panel">
+            <p class="equipment" style="font-weight: bolder; text-align: center">Sarp edijileri we iş wagtyny saýlaň</p>
+            <div class="container_equipment">
+                <div class="energy-power">
+                    <table>
+                        <tbody>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Elektrik çyrasy</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <!--                                        style="align-items: start;height: 28px; width: 50px; border: 1px solid #e0e0e0; border-radius: 3px; padding: 0 8px; display: inline-block; opacity: 0.6"-->
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="60">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="0"
+                                        name="time"
+                                        value="1"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Telewizor</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <!--                                        style="align-items: start;height: 28px; width: 50px; border: 1px solid #e0e0e0; border-radius: 3px; padding: 0 8px; display: inline-block; opacity: 0.6"-->
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="130">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="0"
+                                        name="time"
+                                        value="6"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Sowadyjy</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="100">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="6"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Çäýnek</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="100"
+                                        name="power"
+                                        value="2000">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="0"
+                                        name="time"
+                                        value="0.2"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Mikrotolkunly peç</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="100"
+                                        name="power"
+                                        value="1500">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="0.2"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Gazan</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="200">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="6"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Sirkulýasion nasos</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <!--                                        style="align-items: start;height: 28px; width: 50px; border: 1px solid #e0e0e0; border-radius: 3px; padding: 0 8px; display: inline-block; opacity: 0.6"-->
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="50">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="6"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv" style="display: none;">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Kompýuter</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="350">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="3"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Elektrik peç</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="4000">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="2"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Kofe maşyny</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="1000">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="0.2"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Kir ýuwujy maşyn</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="1600">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="1.5"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Ütük</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="1500">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="1.5"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Tozan sorujy</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="1600">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="0.5"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr style="display: flex; flex-direction: row;">
+                            <td width="29%">
+                                <label>
+                                    <input type="checkbox" name="device" onchange="toggleTextVisibility(this); calculatePower(this)">
+                                    <span>Beýleki enjamlar</span>
+                                </label>
+                            </td>
+                            <td width="83" class="device_count" style="display: flex; flex-direction: row">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="count"
+                                        value="1"
+                                        style="height: 24px; width: 50px; border-radius: 3px; padding: 1px 5px; color: #555555; background: #efefef;border: 1px solid #b3b3b3">
+
+                                <span style="padding-left: 5px;">Sany</span>
+                            </td>
+                            <td width="100" class="device_count" style="margin: 0 30px">
+                                <input
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3"
+                                        type="number"
+                                        min="10" step="10"
+                                        name="power"
+                                        value="">
+                                <span style="padding-left: 5px">Wt</span>
+                            </td>
+                            <td width="95"class="device_count">
+                                <input
+                                        type="number"
+                                        min="1"
+                                        name="time"
+                                        value="1"
+                                        style="height: 24px; width: 50px; padding: 1px 5px; border-radius: 3px; background: #efefef; color: #555555; border: 1px solid #b3b3b3">
+                                <span style="padding-left: 5px">sagat</span>
+                            </td>
+                            <td style="margin-left: 30px; width: 160px; height: 24px" class="device_count">
+                                <select name="control" onchange="calculatePower(this)">
+                                    <option value="1">1 gije-gündizde</option>
+                                    <option value="7">1 hepdede</option>
+                                    <option value="30">1 aýda</option>
+                                </select>
+                            </td>
+                            <td width="100">
+                                <div class="resultDiv">
+                                    Gije-gündizde <b class="resultDay">0</b> kWt&#8226sag
+                                </div>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="rower-cost" style="font-size: 22px; font-weight: 400; color: #188b30; text-align: center">
+                    Günde ortaça ýük <span id="result">0</span> kWt&#8226sag
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid_container">
+        <div class="box1">
+            <div class="left-container">
+                <div class="container-body">
+                    <div class="desc" style="font-size: 19px;">Gün modulyny saýlaň</div>
+                </div>
+                <div class="selected-box-solar active" style="font-size: 18px;">
+                    <select id="solar-module" onchange="updateModule()">
+                        <option value="Solar Module 100 W">Gün moduly 100 W</option>
+                        <option value="Solar Module 150 W">Gün moduly 150 W</option>
+                        <option value="Solar Module 170 W">Gün moduly 170 W</option>
+                        <option value="Solar Module 200 W">Gün moduly 200 W</option>
+                        <option value="Solar Module 250 W">Gün moduly 250 W</option>
+                        <option value="Solar Module 280 W">Gün moduly 280 W</option>
+                        <option value="Solar Module 330 W">Gün moduly 330 W</option>
+                        <option value="Solar Module 340 W">Gün moduly 340 W</option>
+                        <option value="Solar Module 360 W (HC/TCP)">Gün moduly 360 W (HC/TCP)</option>
+                        <option value="Solar Module 390 W (HC/TCP)">Gün moduly 390 W (HC/TCP)</option>
+                        <option value="Solar Module 410 W (HC/TCP)">Gün moduly 410 W (HC/TCP)</option>
+                        <option value="Solar Module 450 W (HC/TCP)">Gün moduly 450 W (HC/TCP)</option>
+                        <option value="Solar Module 460 W (HC/TCP)">Gün moduly 460 W (HC/TCP)</option>
+                        <option value="Solar Module 550 W (HC/TCP)">Gün moduly 550 W (HC/TCP)</option>
+                        <option value="Solar Module 550/690 W (Bifacial)">Gün moduly 550/690 W (Bifacial)</option>
+                        <option value="Solar Module 580/725 W (Bifacial)">Gün moduly 580/725 W (Bifacial)</option>
+                        <option value="Solar Module 610/760 W TOPCon (Bifacial)">Gün moduly 610/760 W TOPCon (Bifacial)</option>
+                        <option value="Solar Module 710/890 W TOPCon (Bifacial)">Gün moduly 710/890 W TOPCon (Bifacial)</option>
+                        <option value="-" class="accordion" style="font-size: 14px; text-decoration: none; color: #555555; padding: 5px;">Mende başga gün moduly bar</option>
+                    </select>
+                    <table class="free-power" style="display: none; overflow: hidden;">
+                        <tbody>
+                        <tr style="display: flex; flex-direction: row">
+                            <td width="58%">
+                                <div class="desc" style="font-size: 19px;">Modulyňyzyň kuwwatyny görkeziň (W)</div>
+                            </td>
+                            <td style="text-align: left;">
+                                <input style="width: 60px; margin-top: 15px;" class="solar_number" type="text" value="100" name="free_power">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table class="free-power">
+                        <tbody>
+                        <tr style="display: flex; flex-direction: row">
+                            <td width="100%" style="display: inline-block">
+                                <div class="desc" style="font-size: 19px;">Sanyny görkeziň</div>
+                            </td>
+                            <td style="margin: 8px 30px; display: flex; flex-direction: row">
+                                <input
+                                        id="solar_panel_count"
+                                        style="width: 30px;"
+                                        class="solar_number"
+                                        type="number"
+                                        value="1"
+                                        min="1"
+                                        name="solar_panel_count"
+                                        onchange="updateArea()" />
+                                <span class="area-res" style="font-size: 19px;">
+                                    =<span id="area">0.68</span>m<sup>2</sup>
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <hr style="margin: 15px 0 7px; color: #f2f2f2">
+                <div class="rotate-param">
+                    <div id="angle-options" style="width: 200px;">Ýerleşýän ýeriňizi saýlaň!</div>
+                    <img id="rotating-image" src="{% static 'images/sb.png' %}" style="transform: rotate(38deg); margin-top: 50px; margin-left: 155px; margin-bottom: -10px; transition: transform 0.5s ease;">
+                </div>
+                <table class="free-rotate" style="margin-top: 85px;">
+                    <tbody>
+                    <tr>
+                        <td width="105" style="margin-top: 80px">
+                            <div class="desc" style="font-size: 19px">Egri burçy</div>
+                        </td>
+                        <td style="text-align: left;">
+                            <div class="input-uniform">
+                                <button style="width: 28px; border: 1px solid #b3b3b3; border-radius: 3px; color: #444;" onclick="adjustAngle(-1)">-</button>
+                                <input class="solar_number" type="number" id="angle-value" value="0" min="0" max="90" onchange="syncAngle(this.value)">
+                                <button style="width: 28px; border: 1px solid #b3b3b3; border-radius: 3px; color: #444;" onclick="adjustAngle(1)">+</button>
+                            </div>
+                            <input type="hidden" name="array_rotate" value="5^10^15^20^25^30^35^40^45^50^55^60^65^70^75^80^85">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="box1">
+            <div class="left-container left-container-1">
+                <div class="container-body">
+                    <div class="selected-box-solar1">
+                        <div class="invertor-images">
+                            <img src="{% static 'images/invertor.jpg' %}" title class="empty-image" style="display: block;">
+                        </div>
+                        <div class="inventor_container">
+                            <div class="desc">Inwertor goşuň</div>
+                            <select name="inverter_panel" id="inverter_panel" class="invertor_panel">
+                                <option value="">Inwertor saýlaň</option>
+                                <option value="1">Tor inwertory SOFAR 3KTLM-G2</option>
+                                <option value="2">Tor inwertory SmartWatt 5K 2*MPPT</option>
+                                <option value="3">Tor inwertory SOFAR 5KTLM-G2</option>
+                                <option value="4">Tor inwertory SOFAR 6KTLM-G2</option>
+                                <option value="5">Tor inwertory SmartWatt 7K 3*MPPT</option>
+                                <option value="6">Tor inwertory SOFAR 7.5KTLM-G2</option>
+                                <option value="7">Tor inwertory SmartWatt 10K 3*MPPT</option>
+                                <option value="8">Tor inwertory SOFAR 10000TL</option>
+                                <option value="9">Tor inwertory SmartWatt 15K 4*MPPT</option>
+                                <option value="10">Tor inwertory SOFAR 15000TL-G2</option>
+                                <option value="11">Tor inwertory SOFAR 20000TL-G2</option>
+                                <option value="12">Tor inwertory SmartWatt 25K 4*MPPT</option>
+                                <option value="13">Tor inwertory SOFAR 25000TL-G2</option>
+                                <option value="14">Tor inwertory SmartWatt 30K 4*MPPT</option>
+                                <option value="15">Tor inwertory SOFAR 30000TL-G2</option>
+                                <option value="16">Tor inwertory SOFAR 40000TL</option>
+                                <option value="17">Tor inwertory SmartWatt 50K 4*MPPT</option>
+                                <option value="18">Tor inwertory SOFAR 50000TL</option>
+                                <option value="19">Tor inwertory Solax Power Mega 50 кВт</option>
+                                <option value="20">Tor inwertory SmartWatt 60K 4*MPPT</option>
+                                <option value="21">Tor inwertory SOFAR 60000TL</option>
+                                <option value="22">Tor inwertory SOFAR 70000TL</option>
+                                <option value="23">Tor inwertory SOFAR 80000TL</option>
+                                <option value="24">Tor inwertory SOFAR 100000TL</option>
+                                <option value=""><b>---GIBRID INWERTORLAR---</b></option>
+                                <option value="25">Gibrid inwertory SILA V 1000P</option>
+                                <option value="26">Gibrid inwertory SILA V 3000M</option>
+                                <option value="27">Gibrid inwertory SILA VI 3000MH</option>
+                                <option value="28">Gibrid inwertory SILA PRO 3000ML</option>
+                                <option value="29">Gibrid inwertory SILA PRO 4000M</option>
+                                <option value="30">Gibrid inwertory SILA PRO 5000M</option>
+                                <option value="31">Gibrid inwertory SILA VI 5000MH</option>
+                                <option value="32">Gibrid inwertory SILA K 5000MO</option>
+                                <option value="33">Gibrid inwertory SILA K 5000MO ( RM )</option>
+                                <option value="34">Gibrid inwertory SILA PRO 5000ML</option>
+                                <option value="35">Gibrid inwertory SILA PRO 5500M</option>
+                                <option value="36">Gibrid inwertory SILA MAX 7200MH</option>
+                                <option value="37">Gibrid inwertory SILA PRO 10000MH</option>
+                                <option value="38">Gibrid inwertory SILA PRO 15000MH</option>
+                                <option value="39">Gibrid inwertory SILA PRO 30000MH</option>
+                            </select>
+                            <table style="padding-right: 65px">
+                                <tbody>
+                                <tr>
+                                    <td style="text-align: left; width: 25%; margin-left: -100px;">
+                                        <input class="solar_number" id="invertor_panel_count" type="number" value="1" min="1" name="invertor_panel_count">
+                                    </td>
+                                    <td width="175">
+                                        <div class="desc">Inwertorlaryň sany</div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 10px auto; width:496px; height: 1px; border: none; color: black">
+                    <div class="selected-box-solar1">
+                        <div class="accum-images">
+                            <img src="{% static 'images/svgel120x120.jpg' %}" title="" class="empty-image" style="display: block">
+                        </div>
+                        <div class="invertor-accum-block">
+                            <div class="desc">Batareýa modulyny goşuň</div>
+                            <select name="accum_type" id="accum_type"class="invertor_panel">
+                                <option value="">Batareýanyň görnüşini saýlaň</option>
+                                <option value="1">LiFePO4</option>
+                                <option value="2">GEL</option>
+                                <option value="3">AGM</option>
+                            </select>
+                            <div class="desc" style="margin-top: 10px;">Näçe kWt&#8226sag ýygnamaly?</div>
+                            <div style="display: flex; flex-direction: row">
+                                <input type="number" class="solar_number" id="accum_count" value="5" min="1" name="accum_count">
+                                <p style="color: #000; margin-top: 5px">=kWt&#8226sag</p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="invertor-dop-block">
+                        <div class="desc">Goşmaça çykdajylary göz öňünde tutuň:</div>
+                        <div class="inputs">
+                            <label style="padding: 3px 0">
+                                <input type="checkbox" name="details1" value="3700">
+                                &nbsp
+                                Berkidijiler
+                            </label>
+                            <label style="padding: 3px 0">
+                                <input type="checkbox" name="details2" value="700">
+                                &nbsp;
+                                Sarp edilýän materiallar
+                            </label>
+                            <label style="padding: 3px 0">
+                                <input type="checkbox" name="details3" value="0.18">
+                                &nbsp;
+                                Gurnama işleri
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div style="display: flex; flex-direction: row" class="power-step">
+        <button class="int">3</button>
+        <div style="display: flex; flex-direction: column; margin-left: 20px">
+            <p class="title1">Gün elektrik stansiýasynyň aýda öndürilmegi</p>
+            <p class="content1">Gün modullaryndan emele gelen energiýanyň size ýeterlikdigini grafiklerden baha beriň</p>
+
+        </div>
+    </div>
+
+    <div id="chart-container" style="width: 1200px; height: 400px;">
+        <canvas id="monthly-output-chart" style="width: 100%; height: 100%;"></canvas>
+    </div>
+
+    <div style="color: #999; font-style: italic; text-align: center; margin-top: 30px;">
+        Energiýanyň mukdary, aýda gündizine (kWt&#8226sag)
+    </div>
+    <div class="tables" style="margin-top: 10px; margin-bottom: 30px">
+        <table border="1" id="monthly-output-table" style="
+        margin: 15px 0;
+        width: 100%;
+        display: table;
+        border-collapse: collapse;
+        box-sizing: border-box;
+        text-indent: initial;
+        unicode-bidi: isolate;
+        border-spacing: 2px;
+        border: 1px solid #d9d9d9;
+        background-color: #f5fffc;
+        text-align: center;
+        padding: 5px;
+        color: #555555;">
+            <thead>
+            <tr>
+                <th>Ýanwar</th>
+                <th>Fewral</th>
+                <th>Mart</th>
+                <th>Aprel</th>
+                <th>Maý</th>
+                <th>Iýun</th>
+                <th>Iýul</th>
+                <th>Awgust</th>
+                <th>Sentýabr</th>
+                <th>Oktýabr</th>
+                <th>Noýabr</th>
+                <th>Dekabr</th>
+            </tr>
+            </thead>
+            <tbody id="monthly-output-table-body">
+            <tr style="color: #999; font-style: italic; text-align: center; margin-top: 0">
+                <td colspan="12">Çykyş görmek üçin ýer we modul saýlaň</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+{#    <div id="chart-container" style="width: 1200px; height: 400px;">#}
+{#        <canvas id="sunny-days-chart"></canvas>#}
+{#    </div>#}
+
+
+    <div class="cost-string" style="font-size: 19px; color: #188b30; text-align: center; margin-bottom: 30px; display: block;">
+        Günde ortaça ýyllyk elektrik öndürmek: <span id="dailyPower">0</span> kWt.
+        Ýylyň dowamynda elektrik energiýasynyň öndürilişi: <span id="yearlyPower">0 </span>kWt.
+    </div>
+
+    <div style="display: flex; flex-direction: row" class="power-step">
+        <button class="int">4</button>
+        <div style="display: flex; flex-direction: column; margin-left: 20px">
+            <p class="title1">Gün elektrik stansiýasynyň tölegi</p>
+            <p class="content1">Elektrik nyrhyňyza görä gün elektrik stansiýasy üçin töleg diagrammasy</p>
+
+        </div>
+    </div>
+
+
+    <div style="padding-bottom: 0; padding-left: 60px;" class="content" onchange="updateChart()">
+        1 kWt sagadyň bahasy:
+        <input id="electricityRate" style="width: 45px" type="text" name="price_power" value="5"> manat.
+        Inflýasiýa:
+        <input id="inflationRate" type="number" style="width: 60px" name="inflation" value="6" step="0.1">%
+    </div>
+
+    <div id="chart-container" style="width: 1200px; height: 400px; margin: 0 auto; padding-top: 20px;">
+        <canvas id="solarChart"></canvas>
+    </div>
+
+    <div>
+        <div style="color: #999; font-style: italic; text-align: center; margin-top: 0">
+            Arassa girdeji, şeýle hem töleg döwri inflýasiýany we gün modullarynyň zaýalanmagyny hasaba almazdan hasaplanýar
+        </div>
+        <table border="1" class="table-result" style="margin: 15px 0; width: 100%;">
+            <tbody>
+            <tr>
+                <th>Gün elektrik stansiýasynyň bahasy</th>
+                <th>Gün elektrik stansiýasynyň töleg döwri</th>
+                <th>20 ýyl arassa girdeji</th>
+            </tr>
+            <tr>
+                <td class="table-res-1">5200,00 man.</td>
+                <td class="table-res-2">7 ýyl</td>
+                <td class="table-res-3">10533,41 man.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="rentab-str" style="font-size: 19px; color: #188b30; text-align: center; margin-bottom: 30px; display: block;">
+        Gün panellerine goýýan maýa goýumyňyzyň girdejisi ýylda 15,13% bolar
+    </div>
+    <div>
+        <p>
+            <b>Gün elektrik stansiýasyny hasaplamak</b> energiýa üpjünçiligi
+            ulgamynyň netijeli işlemegi üçin zerur güýji we enjamlaryň mukdaryny
+            kesgitlemäge kömek edýän möhüm tapgyrdyr.
+        </p>
+        <p>
+            <b>Gün elektrik stansiýasynyň kalkulýatoryny</b> ulanyp,
+            <b>gün panellerini oturtmagyň çykdajylaryna we peýdalaryna</b>
+            çalt baha berip bilersiňiz we gün elektrik stansiýasynyň
+            öwezini dolup bilersiňiz.
+        </p>
+        <p>
+            <b>Gün panelleriniň güýjüni hasaplamak</b> üçin <b>kalkulýator</b>, alternatiw
+            energiýa çeşmelerine geçmek isleýänler üçin amatly guraldyr.
+        </p>
+        <h3>
+            Gün paneli burç kalkulýatory, dünýäniň islendik ýerinde gün
+            izolýasiýa maglumatlary görkezer
+        </h3>
+        <p>
+            <b>Onlaýn gün elektrik stansiýasy kalkulýatory</b>, kartadaky ýerleşişiňizi
+            we gün izolýasiýasynyň derejesini göz öňünde tutup, ulgamyň
+            güýjüni hasaplamaga mümkinçilik berýän usuldyr.
+        </p>
+        <p>
+            <b>Gün paneli kalkulýatoryny</b> ulanyp, möwsümiňize baglylykda ulgamyňyzyň
+            näçe energiýa öndürjekdigini we gün panelleri gurlanda haýsy amatly
+            burçuň has täsirli boljakdygyny kesgitläp bilersiňiz.
+        </p>
+        <h3>
+            Öý ýa-da iş üçin gün elektrik stansiýasynyň parametrlerini hasaplamak
+            üçin onlaýn kalkulýator
+        </h3>
+        <p>
+            Öýüňiz üçin gün elektrik stansiýasyny hasaplamak üçin onlaýn
+            kalkulýator bilen çalt baha berip bilersiňiz:
+        <ul>
+            <li>ulgamyň güýji we ortaça energiýanyň sarp edilişi;</li>
+            <li>energiýa sarp edijileriňiziň ýüküni hasaplamak;</li>
+            <li>gün elektrik stansiýasynyň nyrhyna görä öwezini dolmak.</li>
+        </ul>
+        </p>
+        <p>
+            Öý üçin <b>gün paneli kalkulýatory</b>, diňe bir panelleriň sanyny däl,
+            eýsem <b>ýylyň wagty</b>na we <b>gün işjeňliginiň derejesi</b>ne baglylykda
+            önümçiligini hem hasaplamaga mümkinçilik berýän amatly guraldyr.
+        </p>
+        <p>
+            Onlaýn kalkulýator gün panelleri, öýüňizdäki gün elektrik stansiýasynyň
+            güýjüni hasaplamak üçin - bu öýden çykman arassa energiýa geçişini
+            meýilleşdirmegiň aňsat usulydyr!
+        </p>
+    </div>
+</div>
+
+<footer class="custom-footer">
+    <div class="footer-top">
+        <div class="footer-left">
+            <ul>
+                <li><a href="home.html">BIZ BARADA</a></li>
+                <li><a href="#">HYZMATLAR</a></li>
+                <li><a href="#">HABARLAŞMAK BÖLÜMI</a></li>
+            </ul>
+        </div>
+        <div class="footer-center">
+            <div><span class="icon"><i class="fa fa-phone">  +99365656565</i></span></div>
+            <div><span class="icon"><i class="fa fa-envelope">  gunpanel@sanly.tm</i></span></div>
+        </div>
+        <div class="footer-right">
+            <a href="#" class="policy-link">GIZLINLIK SYÝASATY</a>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>
+            Biz bu web sahypamyzdaky wakalary seljermek üçin hünärmenlerimiziň we üçünji taraplaryň taýýarlan cookie-faýllaryny ulanýarys, bu bolsa ulanyjylar bilen özara gatnaşygy we hyzmaty ösdürmäge mümkinçilik berýär. Sahypamyzyň sahypalaryna göz aýlamagyňyzy dowam etdirmek bilen, ulanyş şertlerini kabul edýäňiz.
+        </p>
+    </div>
+
+    <hr style="width: 100%; height: 1px; border-top: 1px; color: #000"/>
+
+    <div style="text-align: center; justify-content: center; color: #666; font-size: 14px;">
+        <p>2025 &copy; Ähli hukuklar goralan</p>
+    </div>
+</footer>
+
+</body>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=cd311915-daba-4433-ae2f-531af9bdb93a&lang=en_US" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+document.getElementById("solar-module").addEventListener("change", updateChart,);
+document.querySelector("input[name='solar_panel_count']").addEventListener("change", updateChart);
+document.querySelector("select[name='inverter_panel']").addEventListener("change", updateChart);
+document.querySelector("input[name='invertor_panel_count']").addEventListener("change", updateChart);
+document.querySelector("select[name='accum_type']").addEventListener("change", updateChart);
+document.querySelector("input[name='accum_count']").addEventListener("change", updateChart);
+document.querySelectorAll("input[type='checkbox'][name^='details']").forEach(checkbox => {
+    checkbox.addEventListener("change", updateChart);
+});
+
+// Global variables
+let chart = null;
+const ctx = document.getElementById('solarChart').getContext('2d');
+
+
+let componentsData = {
+  panels: [],
+  inverters: [],
+  batteries: []
+};
+
+async function fetchAndPopulateComponents() {
+  try {
+    // In a real implementation, replace with your actual API endpoint
+    const response = await fetch('http://localhost:8000/components/');
+    const data = await response.json();
+
+    componentsData = data;
+  } catch (error) {
+    console.error("Error fetching components:", error);
+    // Fallback to default prices if API fails
+  }
+}
+
+async function calculateTotalCost() {
+    await fetchAndPopulateComponents();
+
+  // Get selected components
+  const panelId = document.getElementById('solar-module').value;
+  const inverterId = document.getElementById('inverter_panel').value;
+  const batteryId = document.getElementById('accum_type').value;
+
+  // Get quantities
+  const panelQty = parseInt(document.getElementById('solar_panel_count').value) || 0;
+  const inverterQty = parseInt(document.getElementById('invertor_panel_count').value) || 0;
+  const batteryQty = parseInt(document.getElementById('accum_count').value) || 0;
+
+  const selectedPanel = componentsData.panels.find(p => p.name === panelId) || componentsData.panels[0];
+  const selectedInverter = componentsData.inverters.find(i => i.id === inverterId) || componentsData.inverters[inverterId];
+  const selectedBattery = componentsData.batteries.find(b => b.id === batteryId) || componentsData.batteries[batteryId];
+  {#console.log(selectedPanel, selectedBattery, selectedInverter)#}
+
+  // Calculate costs
+  const panelCost = selectedPanel ? panelQty * selectedPanel.price : 0;
+  const inverterCost = selectedInverter ? inverterQty * selectedInverter.price : 0;
+  const batteryCost = selectedBattery ? batteryQty * selectedBattery.price : 0;
+  {#console.log(panelCost, inverterCost, batteryCost)#}
+
+  // Calculate annual production based on panels
+  const annualProduction = selectedPanel ? (selectedPanel.power * panelQty * 4.5 * 365 / 1000) : 5000;
+
+  // Add installation and other costs (20% of equipment cost)
+  const installationCost = (panelCost + inverterCost + batteryCost) * 0.2;
+
+  return {
+    totalCost: panelCost + inverterCost + batteryCost + installationCost,
+    annualProduction: annualProduction
+  };
+}
+
+async function updateChart() {
+    const rate = parseFloat(document.getElementById('electricityRate').value) || 0;
+    const inflation = parseFloat(document.getElementById('inflationRate').value) || 0;
+
+    // Calculate system cost and annual production
+    const { totalCost: systemCost, annualProduction } = await calculateTotalCost();
+    let cumulative = -systemCost;
+
+    const labels = [];
+    const data = [];
+    let paybackYear = null;
+
+    // Update daily and yearly production displays
+    const dailyProduction = (annualProduction / 365).toFixed(2);
+    document.getElementById('dailyPower').textContent = dailyProduction;
+    document.getElementById('yearlyPower').textContent = annualProduction.toFixed(2);
+
+    // Calculate cumulative savings for each year
+    for (let year = 0; year <= 20; year++) {
+      labels.push(`${year} ýyl`);
+      if (year > 0) {
+        const adjustedRate = rate * Math.pow(1 + inflation / 100, year - 1);
+        const savings = annualProduction * adjustedRate;
+        cumulative += savings;
+      }
+
+      if (paybackYear === null && cumulative >= 0) {
+        paybackYear = year;
+      }
+
+      data.push(parseFloat(cumulative.toFixed(2)));
+    }
+
+    const netProfit = cumulative;
+    const roi = ((netProfit / systemCost) * 100).toFixed(2); // ROI as percentage
+
+    // Update results table
+    document.querySelector('.table-res-1').innerText = `${systemCost.toLocaleString()} man.`;
+    document.querySelector('.table-res-2').innerText = paybackYear ? `${paybackYear} ýyl` : "–";
+    document.querySelector('.table-res-3').innerText = `${netProfit.toFixed(2).toLocaleString()} man.`;
+    document.querySelector('.rentab-str').innerText = `Gün panellerine goýýan maýa goýumyňyzyň girdejisi ýylda ${roi}% bolar`;
+
+    // Update the chart
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: data.map(val => val < 0 ? '#e74c3c' : '#27ae60'),
+          borderRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `${context.parsed.y.toLocaleString()} manat`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            title: { display: true, text: 'Jemi manatda' }
+          },
+          x: {
+            title: { display: true, text: '' }
+          }
+        }
+      }
+    });
+}
+
+
+
+
+
+
+  updateChart();
+
+    // Global variables
+    let currentLatitude = null;
+    let currentLongitude = null;
+    let monthlyChart = null;
+    let sunnyDaysChart = null;
+    let optimalAngle = 0;
+    let summerAngle = 0;
+    let winterAngle = 0;
+
+    const daysInMonth = {
+        "Ýanwar": 31, "Fewral": 28, "Mart": 31, "Aprel": 30, "Maý": 31, "Iýun": 30,
+        "Iýul": 31, "Awgust": 31, "Sentýabr": 30, "Oktýabr": 31, "Noýabr": 30, "Dekabr": 31
+    };
+
+    // Initialize map
+    ymaps.ready(init);
+
+    function init() {
+        var myMap = new ymaps.Map("map", {
+            center: [37.6, 61.8],
+            zoom: 10
+        });
+
+        var currentMarker = null;
+
+        myMap.events.add('click', function (e) {
+            var coords = e.get('coords');
+
+            if (currentMarker) {
+                myMap.geoObjects.remove(currentMarker);
+            }
+
+            currentMarker = new ymaps.Placemark(coords, {
+                hintContent: 'Selected location',
+                balloonContent: 'Coordinates: [' + coords[0] + ', ' + coords[1] + ']'
+            });
+
+            myMap.geoObjects.add(currentMarker);
+
+            currentLatitude = coords[0];
+            currentLongitude = coords[1];
+
+            updateAngles();
+            updateSolarOutput();
+        });
+    }
+
+    // Solar panel data
+    const moduleAreas = {
+        "Solar Module 100 W": 0.68,
+        "Solar Module 150 W": 0.76,
+        "Solar Module 170 W": 0.8,
+        "Solar Module 200 W": 1.0,
+        "Solar Module 250 W": 1.2,
+        "Solar Module 280 W": 1.3,
+        "Solar Module 330 W": 1.5,
+        "Solar Module 340 W": 1.55,
+        "Solar Module 360 W (HC/TCP)": 1.61,
+        "Solar Module 390 W (HC/TCP)": 1.7,
+        "Solar Module 410 W (HC/TCP)": 1.75,
+        "Solar Module 450 W (HC/TCP)": 1.8,
+        "Solar Module 460 W (HC/TCP)": 1.85,
+        "Solar Module 550 W (HC/TCP)": 2.0,
+        "Solar Module 550/690 W (Bifacial)": 2.1,
+        "Solar Module 580/725 W (Bifacial)": 2.15,
+        "Solar Module 610/760 W TOPCon (Bifacial)": 2.25,
+        "Solar Module 710/890 W TOPCon (Bifacial)": 2.4,
+        "-": 1.5
+    };
+
+    const modulePower = {
+        "Solar Module 100 W": 100,
+        "Solar Module 150 W": 150,
+        "Solar Module 170 W": 170,
+        "Solar Module 200 W": 200,
+        "Solar Module 250 W": 250,
+        "Solar Module 280 W": 280,
+        "Solar Module 330 W": 330,
+        "Solar Module 340 W": 340,
+        "Solar Module 360 W (HC/TCP)": 360,
+        "Solar Module 390 W (HC/TCP)": 390,
+        "Solar Module 410 W (HC/TCP)": 410,
+        "Solar Module 450 W (HC/TCP)": 450,
+        "Solar Module 460 W (HC/TCP)": 460,
+        "Solar Module 550 W (HC/TCP)": 550,
+        "Solar Module 550/690 W (Bifacial)": 550,
+        "Solar Module 580/725 W (Bifacial)": 580,
+        "Solar Module 610/760 W TOPCon (Bifacial)": 610,
+        "Solar Module 710/890 W TOPCon (Bifacial)": 710,
+        "-": 300
+    };
+
+    // Update solar panel area
+    function updateArea() {
+        const module = document.getElementById("solar-module").value;
+        const count = parseInt(document.querySelector("input[name='solar_panel_count']").value) || 0;
+        const areaPerModule = moduleAreas[module] || 1.0;
+        const totalArea = (areaPerModule * count).toFixed(2);
+        document.getElementById("area").textContent = totalArea;
+        updateSolarOutput();
+    }
+
+    function updateModule() {
+        const select = document.getElementById("solar-module");
+        toggleCustomPowerTable(select.value);
+    }
+
+    function toggleCustomPowerTable(value) {
+        const table = document.querySelector(".free-power");
+        if (value === "-") {
+            table.style.display = "block";
+        } else {
+            table.style.display = "none";
+        }
+
+        updateArea();
+    }
+
+    function updateDailyAverageFromTable() {
+        const tableBody = document.getElementById('monthly-output-table-body');
+        const rows = tableBody ? tableBody.getElementsByTagName('tr') : [];
+
+        if (rows.length === 0) {
+            console.warn('No data available in the table.');
+            return;
+        }
+
+        const cells = rows[0].getElementsByTagName('td');
+        let total = 0;
+        let count = 0;
+
+        for (let cell of cells) {
+            const value = parseFloat(cell.textContent.replace(',', '.').trim());
+            if (!isNaN(value)) {
+                total += value;
+                count++;
+            } else {
+                console.warn('Invalid cell value:', cell.textContent);
+            }
+        }
+
+        if (count === 12) {
+            const yearlyOutput = total/12*365;
+            const dailyAverage = total/12;
+
+            document.getElementById("dailyPower").textContent = dailyAverage.toFixed(2);
+            document.getElementById("yearlyPower").textContent = yearlyOutput.toFixed(2);
+        } else {
+            console.warn('Not enough valid monthly data (12 months required).');
+        }
+    }
+
+    // Update tilt angles
+    function updateAngles() {
+        if (currentLatitude === null) {
+            document.getElementById('angle-options').innerHTML = 'Select a location first';
+            document.getElementById('angle-value').value = 0;
+            return;
+        }
+
+        optimalAngle = Math.round(Math.abs(currentLatitude));
+        summerAngle = Math.max(0, optimalAngle - 15);
+        winterAngle = Math.min(90, optimalAngle + 15);
+
+        const angleOptions = `
+    <div class="inputs" style="font-size: 19px">
+        <label id="r1" style="width: 200px">
+            <input data-rotate="0" type="radio" name="rotate" value="0" onchange="updateAngle(this.value)" ${0 === optimalAngle ? 'checked' : ''}>
+            <span>0</span><sup>o</sup> Gorizontal
+        </label>
+        <label id="r2">
+            <input data-rotate="${summerAngle}" type="radio" name="rotate" value="${summerAngle}" onchange="updateAngle(this.value)" ${summerAngle === optimalAngle ? 'checked' : ''}>
+            <span>${summerAngle}</span><sup>o</sup> Tomus
+        </label>
+        <label id="r3">
+            <input data-rotate="${optimalAngle}" type="radio" name="rotate" value="${optimalAngle}" onchange="updateAngle(this.value)" checked>
+            <span>${optimalAngle}</span><sup>o</sup> Iň amatly
+        </label>
+        <label id="r4">
+            <input data-rotate="${winterAngle}" type="radio" name="rotate" value="${winterAngle}" onchange="updateAngle(this.value)" ${winterAngle === optimalAngle ? 'checked' : ''}>
+            <span>${winterAngle}</span><sup>o</sup> Gyş
+        </label>
+        <label id="r5">
+            <input data-rotate="90" type="radio" name="rotate" value="90" onchange="updateAngle(this.value)" ${90 === optimalAngle ? 'checked' : ''}>
+            <span>90</span><sup>o</sup> Wertikal
+        </label>
+    </div>`;
+
+        document.getElementById('angle-options').innerHTML = angleOptions;
+        document.getElementById('angle-value').value = optimalAngle;
+
+        const image = document.getElementById('rotating-image');
+        image.style.transform = `rotate(${optimalAngle}deg)`;
+    }
+
+    function updateAngle(value) {
+        const angleValue = document.getElementById('angle-value');
+        angleValue.value = parseInt(value);
+
+        const radio = document.querySelector(`input[name="rotate"][value="${value}"]`);
+        if (radio) {
+            radio.checked = true;
+        } else {
+            document.querySelectorAll('input[name="rotate"]').forEach(r => r.checked = false);
+        }
+
+        const image = document.getElementById('rotating-image');
+        image.style.transform = `rotate(${value}deg)`;
+        updateSolarOutput();
+    }
+
+    function syncAngle(value) {
+        value = Math.max(0, Math.min(90, parseInt(value) || 0));
+        document.getElementById('angle-value').value = value;
+        updateAngle(value);
+    }
+
+    function adjustAngle(delta) {
+        const angleValue = document.getElementById('angle-value');
+        let newValue = parseInt(angleValue.value) + delta;
+        newValue = Math.max(0, Math.min(90, newValue));
+        syncAngle(newValue);
+    }
+
+    // Calculate power consumption
+    async function calculatePower() {
+        let totalPower = 0;
+        let rows = document.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            let checkbox = row.querySelector('input[type="checkbox"][name="device"]');
+            let resultDayElement = row.querySelector('.resultDay');
+
+            if (!checkbox || !resultDayElement) return;
+
+            if (checkbox.checked) {
+                const countInput = row.querySelector('input[name="count"]');
+                const powerInput = row.querySelector('input[name="power"]');
+                const timeInput = row.querySelector('input[name="time"]');
+                const controlSelect = row.querySelector('select[name="control"]');
+
+                if (countInput && powerInput && timeInput && controlSelect) {
+                    const n = parseFloat(countInput.value) || 0;
+                    const p = parseFloat(powerInput.value) || 0;
+                    const t = parseFloat(timeInput.value) || 0;
+                    const c = parseInt(controlSelect.value) || 1;
+
+                    const devicePower = (n * p * t * c) / 1000;
+                    resultDayElement.textContent = devicePower.toFixed(2);
+                    totalPower += devicePower;
+                }
+            } else {
+                resultDayElement.textContent = '0';
+            }
+        });
+
+        document.getElementById("result").textContent = totalPower.toFixed(2);
+        const monthlyOutput = await calculateMonthlyOutputWithNASA();
+        updateCharts(monthlyOutput);
+    }
+
+    function toggleTextVisibility(checkbox) {
+        const resultDiv = checkbox.closest('tr').querySelector('.resultDiv');
+        resultDiv.style.display = checkbox.checked ? 'block' : 'none';
+    }
+
+    // Fetch NASA data
+    async function fetchNASAData(latitude, longitude) {
+        const urlBase = "https://power.larc.nasa.gov/api/temporal/monthly/point";
+        const params = {
+            parameters: "ALLSKY_SFC_SW_DWN,CLRSKY_SFC_SW_DWN",
+            community: "RE",
+            latitude: latitude,
+            longitude: longitude,
+            format: "JSON",
+            start: "1984",
+            end: "2023"
+        };
+        const queryString = new URLSearchParams(params).toString();
+        const url = `${urlBase}?${queryString}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Failed to fetch NASA data:", error);
+            throw error;
+        }
+    }
+
+    // Get solar data
+    async function getSolarData(latitude, longitude) {
+        try {
+            const data = await fetchNASAData(latitude, longitude);
+            const radiationData = data.properties.parameter.ALLSKY_SFC_SW_DWN;
+            const clearSkyData = data.properties.parameter.CLRSKY_SFC_SW_DWN;
+
+            const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+            const year = '2023';
+
+            const solarRadiation = months.map(month => {
+                const key = `${year}${month}`;
+                return radiationData[key] || 0;
+            });
+
+            // Estimate sunny days based on clear-sky radiation
+            // Assume a day is "sunny" if clear-sky radiation is above a threshold (e.g., 70% of max monthly clear-sky radiation)
+            const sunnyDays = months.map((month, index) => {
+                const key = `${year}${month}`;
+                const clearSkyRadiation = clearSkyData[key] || 0;
+                const maxClearSky = Math.max(...Object.values(clearSkyData));
+                const threshold = maxClearSky * 0.7;
+                // Estimate proportion of days that are likely sunny
+                const sunnyProportion = clearSkyRadiation >= threshold ? 0.9 : clearSkyRadiation / maxClearSky;
+                const days = daysInMonth[Object.keys(daysInMonth)[index]];
+                return Math.round(days * sunnyProportion);
+            });
+
+            return {
+                radiation: solarRadiation,
+                sunnyDays: sunnyDays
+            };
+        } catch (error) {
+            console.error("Error fetching solar data:", error);
+            // Fallback to mock data
+            return {
+                radiation: [2.5, 3.0, 4.0, 5.0, 6.0, 6.5, 6.5, 6.0, 5.0, 3.5, 2.5, 2.0],
+                sunnyDays: [20, 20, 23, 25, 28, 30, 31, 30, 28, 25, 22, 20]
+            };
+        }
+    }
+
+    // Calculate monthly solar output
+    async function calculateMonthlyOutputWithNASA() {
+        if (!currentLatitude || !currentLongitude) {
+            console.warn("No location selected");
+            return null;
+        }
+
+        const data = await fetchNASAData(currentLatitude, currentLongitude);
+        const radiationData = data.properties.parameter.ALLSKY_SFC_SW_DWN;
+
+        const panel = document.getElementById("solar-module").value;
+        const count = parseInt(document.querySelector("input[name='solar_panel_count']").value) || 1;
+        const angle = parseInt(document.getElementById("angle-value").value) || 0;
+
+        let panelPower = modulePower[panel] || 100;
+        const angleEfficiency = 1 - (Math.abs(angle - optimalAngle) * 0.005);
+
+        const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+        const year = '2023';
+
+        return months.map((month, index) => {
+            const key = `${year}${month}`;
+            const radiation = radiationData[key] || 0; // kWh/m²/day
+            const days = daysInMonth[Object.keys(daysInMonth)[index]];
+            const kWh = (radiation * days * panelPower * count * angleEfficiency * 0.8) / 1000;
+            return kWh.toFixed(2);
+        });
+    }
+
+    // Update solar output charts and table
+    async function updateSolarOutput() {
+        if (!currentLatitude || !currentLongitude) {
+            console.warn("No location selected");
+            return;
+        }
+
+        const monthlyOutput = await calculateMonthlyOutputWithNASA();
+        const solarData = await getSolarData(currentLatitude, currentLongitude);
+
+        if (!monthlyOutput) return;
+
+        // Update table
+        const tableBody = document.getElementById("monthly-output-table-body");
+        tableBody.innerHTML = `
+        <tr>
+            ${monthlyOutput.map(val => `<td>${val}</td>`).join('')}
+        </tr>
+    `;
+
+        // Update charts
+        updateCharts(monthlyOutput, solarData.sunnyDays);
+
+        updateDailyAverageFromTable();
+    }
+
+    // Create/update charts
+    function updateCharts(monthlyOutput) {
+        const months = ['Ýanwar', 'Fewral', 'Mart', 'Aprel', 'Maý', 'Iýun', 'Iýul', 'Awgust', 'Sentýabr', 'Oktýabr', 'Noýabr', 'Dekabr'];
+
+        // Monthly output chart
+        const monthlyCtx = document.getElementById('monthly-output-chart').getContext('2d');
+        {#const sunnyCtx = document.getElementById('sunny-days-chart').getContext('2d');#}
+        const dailyAverage = parseFloat(document.getElementById('result').textContent) || 0;
+
+
+        if (monthlyChart) {
+            monthlyChart.destroy();
+        }
+        console.log(typeof monthlyOutput);
+        monthlyChart = new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Gün paneliniň aýlyk kuwwaty (kWt)',
+                    data: monthlyOutput,
+                    backgroundColor: 'rgba(24, 139, 48, 0.7)',
+                    borderColor: 'rgba(24, 139, 48, 1)',
+                    borderWidth: 1,
+                },
+                    {
+                        label: 'Günde ortaça kilowatt',
+                        data: Array(12).fill(dailyAverage), // Repeat the daily average for all months
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5], // Dashed line for distinction
+                        fill: false,
+                        {#pointRadius: 0 // No points for this line#}
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: Math.max(31, Math.ceil(monthlyOutput * 1.2)), // Adjust max to fit both datasets
+                        title: {
+                            display: true,
+                            text: 'Günler / kWt*sag'
+                        }
+                    }
+
+                }
+            }
+        });
+    }
+
+    // Initialize with default values
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('solar-module').value = 'Solar Module 100 W';
+        updateArea();
+
+        document.getElementById('solar-module').addEventListener('change', updateSolarOutput);
+        document.querySelector('input[name="solar_panel_count"]').addEventListener('change', updateSolarOutput);
+        document.getElementById('angle-value').addEventListener('change', function () {
+            syncAngle(this.value);
+            updateSolarOutput();
+        });
+    });
+
+    const subMenu = document.getElementById("subMenu");
+
+    function toggleMenu() {
+        if (subMenu) {
+            subMenu.classList.toggle("open-menu");
+        }
+    }
+
+    const acc = document.getElementsByClassName("accordion");
+
+    for (let i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+</script>
+</html>

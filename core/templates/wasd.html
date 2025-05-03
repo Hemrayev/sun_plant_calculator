@@ -1886,7 +1886,7 @@
             var myMap = new ymaps.Map("map", {
                 center: [37.6, 61.8],  // Default center coordinates
                 zoom: 10,
-                controls: [ ]
+                controls: [ 'zoomControl']
             });
             var currentMarker = null;
             myMap.events.add('click', function (e) {

@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+< lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Gün kalkulýatory</title>
@@ -548,7 +548,7 @@
             <ul>
                 <li><a href="{% url 'home' %}">Baş sahypa</a></li>
                 <li><a href="{% url 'calculator' %}">Kalkulýator</a></li>
-{#                {% if user.is_authenticated %}<li><a href="{% url 'calculated-panels' %}">Hasaplamalaryň taryhy</a></li>{% endif %}#}
+                {#                {% if user.is_authenticated %}<li><a href="{% url 'calculated-panels' %}">Hasaplamalaryň taryhy</a></li>{% endif %}#}
             </ul>
             {% if user.is_authenticated %} <a href="{% url 'sign-out' %}" class="btnLogin-popup">Logout</a>
             {% else %} <a href="{% url 'sign-in' %}" class="btnLogin-popup">Login</a>{% endif %}
@@ -1560,9 +1560,9 @@
         </table>
     </div>
 
-{#    <div id="chart-container" style="width: 1200px; height: 400px;">#}
-{#        <canvas id="sunny-days-chart"></canvas>#}
-{#    </div>#}
+    {#    <div id="chart-container" style="width: 1200px; height: 400px;">#}
+    {#        <canvas id="sunny-days-chart"></canvas>#}
+    {#    </div>#}
 
 
     <div class="cost-string" style="font-size: 19px; color: #188b30; text-align: center; margin-bottom: 30px; display: block;">
@@ -1701,167 +1701,167 @@
 </footer>
 
 </body>
-<script src="https://api-maps.yandex.ru/2.1/?apikey=cd311915-daba-4433-ae2f-531af9bdb93a&lang=en_US" type="text/javascript"></script>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=b6269477-c70f-40cf-85a5-b136e95c1f33&lang=ru&suggest_apikey=c31b6d91-97e4-42e5-8f41-0f8a5b9fdec6" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 
-document.getElementById("solar-module").addEventListener("change", updateChart,);
-document.querySelector("input[name='solar_panel_count']").addEventListener("change", updateChart);
-document.querySelector("select[name='inverter_panel']").addEventListener("change", updateChart);
-document.querySelector("input[name='invertor_panel_count']").addEventListener("change", updateChart);
-document.querySelector("select[name='accum_type']").addEventListener("change", updateChart);
-document.querySelector("input[name='accum_count']").addEventListener("change", updateChart);
-document.querySelectorAll("input[type='checkbox'][name^='details']").forEach(checkbox => {
-    checkbox.addEventListener("change", updateChart);
-});
+    document.getElementById("solar-module").addEventListener("change", updateChart,);
+    document.querySelector("input[name='solar_panel_count']").addEventListener("change", updateChart);
+    document.querySelector("select[name='inverter_panel']").addEventListener("change", updateChart);
+    document.querySelector("input[name='invertor_panel_count']").addEventListener("change", updateChart);
+    document.querySelector("select[name='accum_type']").addEventListener("change", updateChart);
+    document.querySelector("input[name='accum_count']").addEventListener("change", updateChart);
+    document.querySelectorAll("input[type='checkbox'][name^='details']").forEach(checkbox => {
+        checkbox.addEventListener("change", updateChart);
+    });
 
-// Global variables
-let chart = null;
-const ctx = document.getElementById('solarChart').getContext('2d');
+    // Global variables
+    let chart = null;
+    const ctx = document.getElementById('solarChart').getContext('2d');
 
 
-let componentsData = {
-  panels: [],
-  inverters: [],
-  batteries: []
-};
+    let componentsData = {
+        panels: [],
+        inverters: [],
+        batteries: []
+    };
 
-async function fetchAndPopulateComponents() {
-  try {
-    // In a real implementation, replace with your actual API endpoint
-    const response = await fetch('http://localhost:8000/components/');
-    const data = await response.json();
+    async function fetchAndPopulateComponents() {
+        try {
+            // In a real implementation, replace with your actual API endpoint
+            const response = await fetch('http://localhost:8000/components/');
+            const data = await response.json();
 
-    componentsData = data;
-  } catch (error) {
-    console.error("Error fetching components:", error);
-    // Fallback to default prices if API fails
-  }
-}
-
-async function calculateTotalCost() {
-    await fetchAndPopulateComponents();
-
-  // Get selected components
-  const panelId = document.getElementById('solar-module').value;
-  const inverterId = document.getElementById('inverter_panel').value;
-  const batteryId = document.getElementById('accum_type').value;
-
-  // Get quantities
-  const panelQty = parseInt(document.getElementById('solar_panel_count').value) || 0;
-  const inverterQty = parseInt(document.getElementById('invertor_panel_count').value) || 0;
-  const batteryQty = parseInt(document.getElementById('accum_count').value) || 0;
-
-  const selectedPanel = componentsData.panels.find(p => p.name === panelId) || componentsData.panels[0];
-  const selectedInverter = componentsData.inverters.find(i => i.id === inverterId) || componentsData.inverters[inverterId];
-  const selectedBattery = componentsData.batteries.find(b => b.id === batteryId) || componentsData.batteries[batteryId];
-  {#console.log(selectedPanel, selectedBattery, selectedInverter)#}
-
-  // Calculate costs
-  const panelCost = selectedPanel ? panelQty * selectedPanel.price : 0;
-  const inverterCost = selectedInverter ? inverterQty * selectedInverter.price : 0;
-  const batteryCost = selectedBattery ? batteryQty * selectedBattery.price : 0;
-  {#console.log(panelCost, inverterCost, batteryCost)#}
-
-  // Calculate annual production based on panels
-  const annualProduction = selectedPanel ? (selectedPanel.power * panelQty * 4.5 * 365 / 1000) : 5000;
-
-  // Add installation and other costs (20% of equipment cost)
-  const installationCost = (panelCost + inverterCost + batteryCost) * 0.2;
-
-  return {
-    totalCost: panelCost + inverterCost + batteryCost + installationCost,
-    annualProduction: annualProduction
-  };
-}
-
-async function updateChart() {
-    const rate = parseFloat(document.getElementById('electricityRate').value) || 0;
-    const inflation = parseFloat(document.getElementById('inflationRate').value) || 0;
-
-    // Calculate system cost and annual production
-    const { totalCost: systemCost, annualProduction } = await calculateTotalCost();
-    let cumulative = -systemCost;
-
-    const labels = [];
-    const data = [];
-    let paybackYear = null;
-
-    // Update daily and yearly production displays
-    const dailyProduction = (annualProduction / 365).toFixed(2);
-    document.getElementById('dailyPower').textContent = dailyProduction;
-    document.getElementById('yearlyPower').textContent = annualProduction.toFixed(2);
-
-    // Calculate cumulative savings for each year
-    for (let year = 0; year <= 20; year++) {
-      labels.push(`${year} ýyl`);
-      if (year > 0) {
-        const adjustedRate = rate * Math.pow(1 + inflation / 100, year - 1);
-        const savings = annualProduction * adjustedRate;
-        cumulative += savings;
-      }
-
-      if (paybackYear === null && cumulative >= 0) {
-        paybackYear = year;
-      }
-
-      data.push(parseFloat(cumulative.toFixed(2)));
+            componentsData = data;
+        } catch (error) {
+            console.error("Error fetching components:", error);
+            // Fallback to default prices if API fails
+        }
     }
 
-    const netProfit = cumulative;
-    const roi = ((netProfit / systemCost) * 100).toFixed(2); // ROI as percentage
+    async function calculateTotalCost() {
+        await fetchAndPopulateComponents();
 
-    // Update results table
-    document.querySelector('.table-res-1').innerText = `${systemCost.toLocaleString()} man.`;
-    document.querySelector('.table-res-2').innerText = paybackYear ? `${paybackYear} ýyl` : "–";
-    document.querySelector('.table-res-3').innerText = `${netProfit.toFixed(2).toLocaleString()} man.`;
-    document.querySelector('.rentab-str').innerText = `Gün panellerine goýýan maýa goýumyňyzyň girdejisi ýylda ${roi}% bolar`;
+        // Get selected components
+        const panelId = document.getElementById('solar-module').value;
+        const inverterId = document.getElementById('inverter_panel').value;
+        const batteryId = document.getElementById('accum_type').value;
 
-    // Update the chart
-    if (chart) chart.destroy();
+        // Get quantities
+        const panelQty = parseInt(document.getElementById('solar_panel_count').value) || 0;
+        const inverterQty = parseInt(document.getElementById('invertor_panel_count').value) || 0;
+        const batteryQty = parseInt(document.getElementById('accum_count').value) || 0;
 
-    chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: data,
-          backgroundColor: data.map(val => val < 0 ? '#e74c3c' : '#27ae60'),
-          borderRadius: 3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                return `${context.parsed.y.toLocaleString()} manat`;
-              }
+        const selectedPanel = componentsData.panels.find(p => p.name === panelId) || componentsData.panels[0];
+        const selectedInverter = componentsData.inverters.find(i => i.id === inverterId) || componentsData.inverters[inverterId];
+        const selectedBattery = componentsData.batteries.find(b => b.id === batteryId) || componentsData.batteries[batteryId];
+        {#console.log(selectedPanel, selectedBattery, selectedInverter)#}
+
+        // Calculate costs
+        const panelCost = selectedPanel ? panelQty * selectedPanel.price : 0;
+        const inverterCost = selectedInverter ? inverterQty * selectedInverter.price : 0;
+        const batteryCost = selectedBattery ? batteryQty * selectedBattery.price : 0;
+        {#console.log(panelCost, inverterCost, batteryCost)#}
+
+        // Calculate annual production based on panels
+        const annualProduction = selectedPanel ? (selectedPanel.power * panelQty * 4.5 * 365 / 1000) : 5000;
+
+        // Add installation and other costs (20% of equipment cost)
+        const installationCost = (panelCost + inverterCost + batteryCost) * 0.2;
+
+        return {
+            totalCost: panelCost + inverterCost + batteryCost + installationCost,
+            annualProduction: annualProduction
+        };
+    }
+
+    async function updateChart() {
+        const rate = parseFloat(document.getElementById('electricityRate').value) || 0;
+        const inflation = parseFloat(document.getElementById('inflationRate').value) || 0;
+
+        // Calculate system cost and annual production
+        const { totalCost: systemCost, annualProduction } = await calculateTotalCost();
+        let cumulative = -systemCost;
+
+        const labels = [];
+        const data = [];
+        let paybackYear = null;
+
+        // Update daily and yearly production displays
+        const dailyProduction = (annualProduction / 365).toFixed(2);
+        document.getElementById('dailyPower').textContent = dailyProduction;
+        document.getElementById('yearlyPower').textContent = annualProduction.toFixed(2);
+
+        // Calculate cumulative savings for each year
+        for (let year = 0; year <= 20; year++) {
+            labels.push(`${year} ýyl`);
+            if (year > 0) {
+                const adjustedRate = rate * Math.pow(1 + inflation / 100, year - 1);
+                const savings = annualProduction * adjustedRate;
+                cumulative += savings;
             }
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: false,
-            title: { display: true, text: 'Jemi manatda' }
-          },
-          x: {
-            title: { display: true, text: '' }
-          }
+
+            if (paybackYear === null && cumulative >= 0) {
+                paybackYear = year;
+            }
+
+            data.push(parseFloat(cumulative.toFixed(2)));
         }
-      }
-    });
-}
+
+        const netProfit = cumulative;
+        const roi = ((netProfit / systemCost) * 100).toFixed(2); // ROI as percentage
+
+        // Update results table
+        document.querySelector('.table-res-1').innerText = `${systemCost.toLocaleString()} man.`;
+        document.querySelector('.table-res-2').innerText = paybackYear ? `${paybackYear} ýyl` : "–";
+        document.querySelector('.table-res-3').innerText = `${netProfit.toFixed(2).toLocaleString()} man.`;
+        document.querySelector('.rentab-str').innerText = `Gün panellerine goýýan maýa goýumyňyzyň girdejisi ýylda ${roi}% bolar`;
+
+        // Update the chart
+        if (chart) chart.destroy();
+
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: data.map(val => val < 0 ? '#e74c3c' : '#27ae60'),
+                    borderRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.parsed.y.toLocaleString()} manat`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: { display: true, text: 'Jemi manatda' }
+                    },
+                    x: {
+                        title: { display: true, text: '' }
+                    }
+                }
+            }
+        });
+    }
 
 
 
 
 
 
-  updateChart();
+    updateChart();
 
     // Global variables
     let currentLatitude = null;
@@ -1877,37 +1877,101 @@ async function updateChart() {
         "Iýul": 31, "Awgust": 31, "Sentýabr": 30, "Oktýabr": 31, "Noýabr": 30, "Dekabr": 31
     };
 
-    // Initialize map
+
     ymaps.ready(init);
 
     function init() {
-        var myMap = new ymaps.Map("map", {
-            center: [37.6, 61.8],
-            zoom: 10
-        });
+        try {
+            // Create map instance
+            var myMap = new ymaps.Map("map", {
+                center: [37.6, 61.8],  // Default center coordinates
+                zoom: 10,
+                controls: [ ]
+            });
+            var currentMarker = null;
+            myMap.events.add('click', function (e) {
+                var coords = e.get('coords');
 
-        var currentMarker = null;
+                if (currentMarker) {
+                    myMap.geoObjects.remove(currentMarker);
+                }
 
-        myMap.events.add('click', function (e) {
-            var coords = e.get('coords');
+                currentMarker = new ymaps.Placemark(coords, {
+                    hintContent: 'Selected location',
+                    balloonContent: 'Coordinates: [' + coords[0] + ', ' + coords[1] + ']'
+                });
 
-            if (currentMarker) {
-                myMap.geoObjects.remove(currentMarker);
-            }
+                myMap.geoObjects.add(currentMarker);
 
-            currentMarker = new ymaps.Placemark(coords, {
-                hintContent: 'Selected location',
-                balloonContent: 'Coordinates: [' + coords[0] + ', ' + coords[1] + ']'
+                currentLatitude = coords[0];
+                currentLongitude = coords[1];
+                updateAngles();
+                updateSolarOutput();
+
             });
 
-            myMap.geoObjects.add(currentMarker);
+            {#var searchControl = myMap.controls.get('searchControl');#}
+            var searchControl = new ymaps.control.SearchControl({
+                options: {
+                    noPlacemark: true,
+                    placeholderContent: 'Search for a location...',
+                    provider: 'yandex#search',
+                    size: 'large',
+                    noPopup: false
+                }
+            });
+            myMap.controls.add(searchControl);
 
-            currentLatitude = coords[0];
-            currentLongitude = coords[1];
+// Override resultselect to prevent popup/balloon
+            searchControl.events.add('resultselect', function (e) {
+                var index = e.get('index');
 
-            updateAngles();
-            updateSolarOutput();
-        });
+                // Prevent default popup
+                e.preventDefault();
+
+                searchControl.getResult(index).then(function (res) {
+                    var coords = res.geometry.getCoordinates();
+
+                    // Just pan to the location without showing anything
+                    myMap.setCenter(coords);
+                    myMap.setZoom(14);  // optional
+
+                    currentLatitude = coords[0];
+                    currentLongitude = coords[1];
+                    updateAngles();
+                    updateSolarOutput();
+                });
+            });
+
+            {#searchControl.events.add('resultselect', function (e) {#}
+            {#    var index = e.get('index');#}
+            {##}
+            {#    searchControl.getResult(index).then(function (res) {#}
+            {#        // Get coordinates from the selected result#}
+            {#        var coords = res.geometry.getCoordinates();#}
+            {##}
+            {#        // Optionally remove previous marker#}
+            {#        if (currentMarker) {#}
+            {#            myMap.geoObjects.remove(currentMarker);#}
+            {#        }#}
+            {##}
+            {#        // Optionally, just update internal coordinates without showing anything#}
+            {#        currentLatitude = coords[0];#}
+            {#        currentLongitude = coords[1];#}
+            {##}
+            {#        // If you DO want to add your custom marker:#}
+            {##}
+            {#        currentMarker = new ymaps.Placemark(coords, {}, {#}
+            {#            hasHint: false,#}
+            {#            hasBalloon: false#}
+            {#            #}
+            {#        });#}
+            {#        myMap.geoObjects.add(currentMarker);#}
+            {#    });#}
+            {# });#}
+        } catch (error) {
+            console.error("Error initializing Yandex Map:", error);
+        }
     }
 
     // Solar panel data
@@ -2267,7 +2331,6 @@ async function updateChart() {
         if (monthlyChart) {
             monthlyChart.destroy();
         }
-        console.log(typeof monthlyOutput);
         monthlyChart = new Chart(monthlyCtx, {
             type: 'line',
             data: {

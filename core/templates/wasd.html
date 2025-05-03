@@ -1729,7 +1729,7 @@
     async function fetchAndPopulateComponents() {
         try {
             // In a real implementation, replace with your actual API endpoint
-            const response = await fetch('http://localhost:8000/components/');
+            const response = await fetch('http://127.0.0.1:8000/components/');
             const data = await response.json();
 
             componentsData = data;
@@ -1916,8 +1916,8 @@
                     noPlacemark: true,
                     placeholderContent: 'Search for a location...',
                     {#provider: 'yandex#search',#}
-                    size: 'large',
-                    noPopup: false
+                    {#size: 'large',#}
+                    noPopup: true,
                 }
             });
             myMap.controls.add(searchControl);
